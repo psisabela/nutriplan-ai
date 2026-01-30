@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriPlan AI - Seu Plano Alimentar Personalizado</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2C5F2D 0%, #84B59F 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .step {
+            margin-bottom: 40px;
+        }
+
+        .step-title {
+            font-size: 1.5em;
+            color: #2C5F2D;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #84B59F;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #84B59F;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2C5F2D 0%, #84B59F 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(44, 95, 45, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2C5F2D;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #2C5F2D;
+        }
+
+        .success.active {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #84B59F;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box h4 {
+            color: #2C5F2D;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥗 NutriPlan AI</h1>
+            <p>Seu plano alimentar personalizado em segundos</p>
+        </div>
+
+        <div class="form-section" id="formSection">
+            <!-- STEP 1: Dados Pessoais -->
+            <div class="step">
+                <h2 class="step-title">📋 Etapa 1: Dados Pessoais</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Nome:</label>
+                        <input type="text" id="name" placeholder="Seu nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Idade:</label>
+                        <input type="number" id="age" min="15" max="100" placeholder="26" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Peso (kg):</label>
+                        <input type="number" id="weight" min="40" max="200" step="0.1" placeholder="59" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Altura (cm):</label>
+                        <input type="number" id="height" min="140" max="220" placeholder="165" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Sexo:</label>
+                        <select id="gender" required>
+                            <option value="">Selecione...</option>
+                            <option value="F">Feminino</option>
+                            <option value="M">Masculino</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Rotina e Objetivos -->
+            <div class="step">
+                <h2 class="step-title">⏰ Etapa 2: Rotina e Objetivos</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="wakeTime">Horário que acorda:</label>
+                        <input type="time" id="wakeTime" value="05:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workHours">Horas de trabalho/dia:</label>
+                        <input type="number" id="workHours" min="0" max="16" value="9" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityLevel">Nível de atividade física:</label>
+                        <select id="activityLevel" required>
+                            <option value="">Selecione...</option>
+                            <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
+                            <option value="leve">Leve (1-3 dias/semana)</option>
+                            <option value="moderado">Moderado (3-5 dias/semana)</option>
+                            <option value="intenso">Intenso (6-7 dias/semana)</option>
+                            <option value="atleta">Atleta (2x por dia)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal">Objetivo principal:</label>
+                        <select id="goal" required>
+                            <option value="">Selecione...</option>
+                            <option value="perder">Perder peso</option>
+                            <option value="manter">Manter peso</option>
+                            <option value="ganhar">Ganhar massa muscular</option>
+                            <option value="performance">Melhorar performance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de trabalho/estilo de vida:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="desk_job" value="sedentario">
+                            <label for="desk_job">Trabalho sentado</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="mental_work" value="mental">
+                            <label for="mental_work">Alta concentração mental</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="low_sun" value="pouco_sol">
+                            <label for="low_sun">Pouca exposição ao sol</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="stress" value="stress">
+                            <label for="stress">Alto estresse</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Preferências Alimentares -->
+            <div class="step">
+                <h2 class="step-title">🍽️ Etapa 3: Preferências Alimentares</h2>
+                
+                <div class="form-group">
+                    <label for="diet_type">Tipo de dieta:</label>
+                    <select id="diet_type" required>
+                        <option value="">Selecione...</option>
+                        <option value="onivoro">Onívoro (como tudo)</option>
+                        <option value="vegetariano">Vegetariano</option>
+                        <option value="vegano">Vegano</option>
+                        <option value="low_carb">Low Carb</option>
+                        <option value="flexivel">Flexível</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Restrições alimentares ou alergias:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="lactose" value="lactose">
+                            <label for="lactose">Lactose</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gluten" value="gluten">
+                            <label for="gluten">Glúten</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="nuts" value="oleaginosas">
+                            <label for="nuts">Oleaginosas</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="eggs" value="ovos">
+                            <label for="eggs">Ovos</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="fish" value="peixes">
+                            <label for="fish">Peixes/Frutos do mar</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="dislikes">Alimentos que não gosta (opcional):</label>
+                    <textarea id="dislikes" rows="3" placeholder="Ex: brócolis, feijão, abóbora..."></textarea>
+                </div>
+            </div>
+
+            <!-- STEP 4: Suplementação -->
+            <div class="step">
+                <h2 class="step-title">💊 Etapa 4: Suplementação (opcional)</h2>
+                
+                <div class="info-box">
+                    <h4>ℹ️ Sobre suplementação</h4>
+                    <p>Marque os suplementos que você já toma ou gostaria de incluir. Nosso plano incluirá recomendações baseadas no seu perfil.</p>
+                </div>
+
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="supl_vitd" value="vitamina_d">
+                        <label for="supl_vitd">Vitamina D</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="supl_omega" value="omega3">
+                        <label for="supl_omega">Ômega 3</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="supl_multi" value="multivitaminico">
+                        <label for="supl_multi">Multivitamínico</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="supl_protein" value="whey">
+                        <label for="supl_protein">Whey Protein</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="supl_creatine" value="creatina">
+                        <label for="supl_creatine">Creatina</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="generatePlan()">
+                🚀 Gerar Meu Plano Alimentar Personalizado
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h2>Criando seu plano personalizado...</h2>
+            <p>Isso pode levar alguns segundos</p>
+        </div>
+
+        <div class="success" id="success">
+            <div class="success-icon">✅</div>
+            <h2>Plano criado com sucesso!</h2>
+            <p>Seu arquivo PowerPoint está sendo baixado automaticamente.</p>
+            <button class="btn" onclick="location.reload()">Criar outro plano</button>
+        </div>
+    </div>
+
+    <script>
+        // Função para calcular TMB (Taxa Metabólica Basal)
+        function calculateTMB(weight, height, age, gender) {
+            if (gender === 'M') {
+                return 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                return 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+        }
+
+        // Função para calcular calorias diárias
+        function calculateDailyCalories(tmb, activityLevel, goal) {
+            const activityMultipliers = {
+                'sedentario': 1.2,
+                'leve': 1.375,
+                'moderado': 1.55,
+                'intenso': 1.725,
+                'atleta': 1.9
+            };
+
+            let calories = tmb * activityMultipliers[activityLevel];
+
+            // Ajustar baseado no objetivo
+            if (goal === 'perder') calories *= 0.85; // Déficit de 15%
+            if (goal === 'ganhar') calories *= 1.15; // Superávit de 15%
+
+            return Math.round(calories);
+        }
+
+        // Função para calcular macros
+        function calculateMacros(calories, goal, activityLevel) {
+            let proteinPercentage, carbPercentage, fatPercentage;
+
+            if (goal === 'ganhar' || activityLevel === 'intenso' || activityLevel === 'atleta') {
+                proteinPercentage = 0.30; // 30%
+                carbPercentage = 0.45;    // 45%
+                fatPercentage = 0.25;     // 25%
+            } else if (goal === 'perder') {
+                proteinPercentage = 0.35; // 35%
+                carbPercentage = 0.35;    // 35%
+                fatPercentage = 0.30;     // 30%
+            } else {
+                proteinPercentage = 0.25; // 25%
+                carbPercentage = 0.50;    // 50%
+                fatPercentage = 0.25;     // 25%
+            }
+
+            return {
+                protein: Math.round((calories * proteinPercentage) / 4),
+                carbs: Math.round((calories * carbPercentage) / 4),
+                fats: Math.round((calories * fatPercentage) / 9)
+            };
+        }
+
+        // Banco de dados de refeições
+        const mealDatabase = {
+            breakfast: [
+                {
+                    name: "Ovos com Abacate",
+                    items: ["2 ovos mexidos", "1/2 abacate", "2 fatias pão integral", "1 banana", "Café"],
+                    tags: ["proteico", "saudavel"]
+                },
+                {
+                    name: "Tapioca Proteica",
+                    items: ["2 col. sopa tapioca", "2 ovos", "Queijo cottage", "Mamão", "Chá verde"],
+                    tags: ["sem_gluten", "proteico"]
+                },
+                {
+                    name: "Panqueca de Aveia",
+                    items: ["3 col. sopa aveia", "2 ovos", "1 banana", "Mel", "Café com leite"],
+                    tags: ["fitness", "saudavel"]
+                },
+                {
+                    name: "Bowl Energético",
+                    items: ["Iogurte grego 200ml", "Granola 3 col", "Frutas vermelhas", "Mel", "Café"],
+                    tags: ["rapido", "proteico"]
+                }
+            ],
+            snacks: [
+                {
+                    name: "Mix de Nuts",
+                    items: ["30g castanhas variadas", "1 maçã"],
+                    tags: ["pratico"]
+                },
+                {
+                    name: "Iogurte com Chia",
+                    items: ["200ml iogurte natural", "1 col sopa chia", "Frutas vermelhas"],
+                    tags: ["proteico"]
+                },
+                {
+                    name: "Pasta de Amendoim",
+                    items: ["2 col sopa pasta amendoim", "1 banana", "Canela"],
+                    tags: ["energetico"]
+                },
+                {
+                    name: "Queijo e Biscoitos",
+                    items: ["30g queijo branco", "5 biscoitos integrais", "Tomate cereja"],
+                    tags: ["pratico"]
+                }
+            ],
+            lunch: [
+                {
+                    name: "Frango Grelhado Completo",
+                    protein: "150g frango grelhado",
+                    carb: "4 col sopa arroz integral",
+                    veggies: "Salada verde + Brócolis + Cenoura",
+                    tags: ["classico"]
+                },
+                {
+                    name: "Salmão com Batata Doce",
+                    protein: "150g salmão grelhado",
+                    carb: "1 batata doce média",
+                    veggies: "Aspargos + Salada verde",
+                    tags: ["omega3"]
+                },
+                {
+                    name: "Carne com Quinoa",
+                    protein: "150g carne magra",
+                    carb: "3 col sopa quinoa",
+                    veggies: "Abobrinha + Berinjela + Salada",
+                    tags: ["nutritivo"]
+                },
+                {
+                    name: "Tilápia com Legumes",
+                    protein: "150g tilápia grelhada",
+                    carb: "3 col sopa arroz integral",
+                    veggies: "Mix de legumes assados",
+                    tags: ["leve"]
+                }
+            ],
+            dinner: [
+                {
+                    name: "Omelete de Vegetais",
+                    protein: "3 ovos + vegetais",
+                    carb: "2 col sopa arroz integral",
+                    veggies: "Salada verde abundante",
+                    tags: ["leve"]
+                },
+                {
+                    name: "Frango com Legumes",
+                    protein: "120g frango grelhado",
+                    carb: "2 col sopa batata doce",
+                    veggies: "Sopa de legumes",
+                    tags: ["reconfortante"]
+                },
+                {
+                    name: "Peixe ao Forno",
+                    protein: "120g peixe branco",
+                    carb: "Abóbora assada",
+                    veggies: "Espinafre refogado + Salada",
+                    tags: ["leve", "omega3"]
+                }
+            ]
+        };
+
+        // Função para gerar plano semanal variado
+        function generateWeeklyMeals(dietType, restrictions) {
+            const week = [];
+            const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+            
+            days.forEach((day, index) => {
+                week.push({
+                    day: day,
+                    breakfast: mealDatabase.breakfast[index % mealDatabase.breakfast.length],
+                    snack1: mealDatabase.snacks[index % mealDatabase.snacks.length],
+                    lunch: mealDatabase.lunch[index % mealDatabase.lunch.length],
+                    snack2: mealDatabase.snacks[(index + 1) % mealDatabase.snacks.length],
+                    dinner: mealDatabase.dinner[index % mealDatabase.dinner.length]
+                });
+            });
+
+            return week;
+        }
+
+        // Função para gerar lista de compras
+        function generateShoppingList(weeklyMeals) {
+            const categories = {
+                'Proteínas': ['ovos', 'frango', 'peixe', 'salmão', 'tilápia', 'carne', 'queijo', 'iogurte'],
+                'Carboidratos': ['pão integral', 'arroz integral', 'batata doce', 'tapioca', 'aveia', 'quinoa', 'biscoitos integrais'],
+                'Frutas': ['banana', 'maçã', 'mamão', 'frutas vermelhas', 'damascos'],
+                'Vegetais': ['abacate', 'brócolis', 'cenoura', 'abobrinha', 'berinjela', 'espinafre', 'tomate', 'salada'],
+                'Oleaginosas': ['castanhas', 'amêndoas', 'nozes', 'pasta amendoim', 'chia'],
+                'Bebidas': ['café', 'chá verde'],
+                'Outros': ['azeite', 'mel', 'granola', 'canela']
+            };
+
+            const shoppingList = {};
+            for (let category in categories) {
+                shoppingList[category] = [];
+            }
+
+            // Processar todas as refeições da semana
+            weeklyMeals.forEach(day => {
+                const allItems = [
+                    ...day.breakfast.items,
+                    ...day.snack1.items,
+                    [day.lunch.protein, day.lunch.carb, day.lunch.veggies].join(' '),
+                    ...day.snack2.items,
+                    [day.dinner.protein, day.dinner.carb, day.dinner.veggies].join(' ')
+                ].join(' ').toLowerCase();
+
+                for (let category in categories) {
+                    categories[category].forEach(item => {
+                        if (allItems.includes(item) && !shoppingList[category].includes(item)) {
+                            shoppingList[category].push(item);
+                        }
+                    });
+                }
+            });
+
+            return shoppingList;
+        }
+
+        async function generatePlan() {
+            // Coletar dados do formulário
+            const userData = {
+                name: document.getElementById('name').value,
+                age: parseInt(document.getElementById('age').value),
+                weight: parseFloat(document.getElementById('weight').value),
+                height: parseInt(document.getElementById('height').value),
+                gender: document.getElementById('gender').value,
+                wakeTime: document.getElementById('wakeTime').value,
+                workHours: parseInt(document.getElementById('workHours').value),
+                activityLevel: document.getElementById('activityLevel').value,
+                goal: document.getElementById('goal').value,
+                dietType: document.getElementById('diet_type').value,
+                lifestyle: {
+                    deskJob: document.getElementById('desk_job').checked,
+                    mentalWork: document.getElementById('mental_work').checked,
+                    lowSun: document.getElementById('low_sun').checked,
+                    stress: document.getElementById('stress').checked
+                },
+                restrictions: {
+                    lactose: document.getElementById('lactose').checked,
+                    gluten: document.getElementById('gluten').checked,
+                    nuts: document.getElementById('nuts').checked,
+                    eggs: document.getElementById('eggs').checked,
+                    fish: document.getElementById('fish').checked
+                },
+                supplements: {
+                    vitaminD: document.getElementById('supl_vitd').checked,
+                    omega3: document.getElementById('supl_omega').checked,
+                    multi: document.getElementById('supl_multi').checked,
+                    protein: document.getElementById('supl_protein').checked,
+                    creatine: document.getElementById('supl_creatine').checked
+                },
+                dislikes: document.getElementById('dislikes').value
+            };
+
+            // Validação
+            if (!userData.name || !userData.age || !userData.weight || !userData.height || 
+                !userData.gender || !userData.activityLevel || !userData.goal || !userData.dietType) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+
+            // Calcular nutrição
+            const tmb = calculateTMB(userData.weight, userData.height, userData.age, userData.gender);
+            const dailyCalories = calculateDailyCalories(tmb, userData.activityLevel, userData.goal);
+            const macros = calculateMacros(dailyCalories, userData.goal, userData.activityLevel);
+
+            // Gerar plano semanal
+            const weeklyMeals = generateWeeklyMeals(userData.dietType, userData.restrictions);
+            const shoppingList = generateShoppingList(weeklyMeals);
+
+            // Aguardar um pouco para simular processamento
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Criar apresentação
+            await createPresentationWithData(userData, { tmb, dailyCalories, macros }, weeklyMeals, shoppingList);
+
+            // Mostrar sucesso
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('success').classList.add('active');
+        }
+
+        async function createPresentationWithData(userData, nutrition, weeklyMeals, shoppingList) {
+            const pres = new pptxgen();
+            pres.layout = 'LAYOUT_16x9';
+            pres.author = 'NutriPlan AI';
+            pres.title = `Plano Alimentar - ${userData.name}`;
+
+            // Cores
+            const primary = "2C5F2D";
+            const secondary = "84B59F";
+            const accent = "50808E";
+            const cream = "F5F5F5";
+            const white = "FFFFFF";
+
+            // SLIDE 1: Capa
+            let slide1 = pres.addSlide();
+            slide1.background = { color: primary };
+            slide1.addText(`Plano Alimentar Personalizado`, {
+                x: 0.5, y: 1.5, w: 9, h: 0.8,
+                fontSize: 44, bold: true, color: white, align: "center", fontFace: "Georgia"
+            });
+            slide1.addText(`${userData.name}`, {
+                x: 0.5, y: 2.4, w: 9, h: 0.6,
+                fontSize: 32, color: cream, align: "center", fontFace: "Calibri", italic: true
+            });
+            slide1.addText("🥗", { x: 4.65, y: 3.2, w: 0.7, h: 0.7, fontSize: 60, align: "center" });
+            slide1.addText(`Gerado por NutriPlan AI`, {
+                x: 0.5, y: 4.3, w: 9, h: 0.4,
+                fontSize: 14, color: cream, align: "center", fontFace: "Calibri"
+            });
+
+            // SLIDE 2: Seu Perfil e Objetivos
+            let slide2 = pres.addSlide();
+            slide2.background = { color: cream };
+            slide2.addText("Seu Perfil e Objetivos", {
+                x: 0.5, y: 0.3, w: 9, h: 0.5,
+                fontSize: 32, bold: true, color: primary, fontFace: "Georgia"
+            });
+
+            const goalText = {
+                'perder': 'Perder Peso',
+                'manter': 'Manter Peso',
+                'ganhar': 'Ganhar Massa Muscular',
+                'performance': 'Melhorar Performance'
+            };
+
+            const activityText = {
+                'sedentario': 'Sedentário',
+                'leve': 'Levemente Ativo',
+                'moderado': 'Moderadamente Ativo',
+                'intenso': 'Muito Ativo',
+                'atleta': 'Atleta'
+            };
+
+            const profileData = [
+                [`${userData.age} anos`, `${userData.weight}kg`, `${userData.height}cm`],
+                [`Objetivo: ${goalText[userData.goal]}`, `Atividade: ${activityText[userData.activityLevel]}`, `Acorda: ${userData.wakeTime}`]
+            ];
+
+            slide2.addTable(profileData, {
+                x: 0.5, y: 1.1, w: 9, h: 1.2,
+                fontSize: 14, fontFace: "Calibri",
+                fill: { color: white },
+                border: { pt: 2, color: secondary },
+                align: "center", valign: "middle"
+            });
+
+            // Necessidades Nutricionais
+            slide2.addText("Suas Necessidades Nutricionais Diárias:", {
+                x: 0.5, y: 2.6, w: 9, h: 0.4,
+                fontSize: 18, bold: true, color: accent, fontFace: "Calibri"
+            });
+
+            const nutritionBoxes = [
+                { label: "Calorias", value: `${nutrition.dailyCalories} kcal`, color: "E85D75" },
+                { label: "Proteínas", value: `${nutrition.macros.protein}g`, color: "4ECDC4" },
+                { label: "Carboidratos", value: `${nutrition.macros.carbs}g`, color: "FFB84D" },
+                { label: "Gorduras", value: `${nutrition.macros.fats}g`, color: "A78BFA" }
+            ];
+
+            nutritionBoxes.forEach((box, i) => {
+                const x = 0.5 + (i * 2.3);
+                slide2.addShape(pres.shapes.RECTANGLE, {
+                    x: x, y: 3.2, w: 2.1, h: 1.2,
+                    fill: { color: box.color },
+                    line: { type: "none" }
+                });
+                slide2.addText(box.value, {
+                    x: x, y: 3.4, w: 2.1, h: 0.5,
+                    fontSize: 24, bold: true, color: white, align: "center", fontFace: "Calibri"
+                });
+                slide2.addText(box.label, {
+                    x: x, y: 3.9, w: 2.1, h: 0.3,
+                    fontSize: 12, color: white, align: "center", fontFace: "Calibri"
+                });
+            });
+
+            // Estilo de Vida
+            if (userData.lifestyle.deskJob || userData.lifestyle.mentalWork || userData.lifestyle.lowSun || userData.lifestyle.stress) {
+                slide2.addText("Considerações Especiais:", {
+                    x: 0.5, y: 4.6, w: 9, h: 0.3,
+                    fontSize: 16, bold: true, color: primary, fontFace: "Calibri"
+                });
+
+                const considerations = [];
+                if (userData.lifestyle.lowSun) considerations.push("• Suplementação de Vitamina D recomendada");
+                if (userData.lifestyle.mentalWork) considerations.push("• Alimentos para clareza mental priorizados");
+                if (userData.lifestyle.deskJob) considerations.push("• Lanches práticos para trabalho");
+                if (userData.lifestyle.stress) considerations.push("• Alimentos anti-stress incluídos");
+
+                slide2.addText(considerations.join("\n"), {
+                    x: 0.7, y: 5.0, w: 8.6, h: 0.5,
+                    fontSize: 11, color: "333333", fontFace: "Calibri"
+                });
+            }
+
+            // SLIDES 3-9: Plano Semanal (um dia por slide)
+            weeklyMeals.forEach((dayMeal, index) => {
+                let slide = pres.addSlide();
+                slide.background = { color: cream };
+                
+                slide.addText(`📅 ${dayMeal.day}`, {
+                    x: 0.5, y: 0.3, w: 9, h: 0.5,
+                    fontSize: 32, bold: true, color: primary, fontFace: "Georgia"
+                });
+
+                slide.addShape(pres.shapes.RECTANGLE, {
+                    x: 0.5, y: 0.9, w: 9, h: 0.05,
+                    fill: { color: secondary }, line: { type: "none" }
+                });
+
+                // Café da Manhã
+                slide.addText("☀️ Café da Manhã", {
+                    x: 0.5, y: 1.1, w: 9, h: 0.3,
+                    fontSize: 16, bold: true, color: accent, fontFace: "Calibri"
+                });
+                slide.addText(dayMeal.breakfast.items.join(" • "), {
+                    x: 0.7, y: 1.45, w: 8.6, h: 0.4,
+                    fontSize: 11, color: "333333", fontFace: "Calibri"
+                });
+
+                // Lanche Manhã
+                slide.addText("🍎 Lanche da Manhã", {
+                    x: 0.5, y: 1.95, w: 9, h: 0.3,
+                    fontSize: 16, bold: true, color: accent, fontFace: "Calibri"
+                });
+                slide.addText(dayMeal.snack1.items.join(" • "), {
+                    x: 0.7, y: 2.3, w: 8.6, h: 0.4,
+                    fontSize: 11, color: "333333", fontFace: "Calibri"
+                });
+
+                // Almoço
+                slide.addText("🍽️ Almoço", {
+                    x: 0.5, y: 2.8, w: 9, h: 0.3,
+                    fontSize: 16, bold: true, color: accent, fontFace: "Calibri"
+                });
+                slide.addText(`Proteína: ${dayMeal.lunch.protein}\nCarboidrato: ${dayMeal.lunch.carb}\nVegetais: ${dayMeal.lunch.veggies}`, {
+                    x: 0.7, y: 3.15, w: 8.6, h: 0.6,
+                    fontSize: 11, color: "333333", fontFace: "Calibri"
+                });
+
+                // Lanche Tarde
+                slide.addText("☕ Lanche da Tarde", {
+                    x: 0.5, y: 3.9, w: 9, h: 0.3,
+                    fontSize: 16, bold: true, color: accent, fontFace: "Calibri"
+                });
+                slide.addText(dayMeal.snack2.items.join(" • "), {
+                    x: 0.7, y: 4.25, w: 8.6, h: 0.4,
+                    fontSize: 11, color: "333333", fontFace: "Calibri"
+                });
+
+                // Jantar
+                slide.addText("🌙 Jantar", {
+                    x: 0.5, y: 4.75, w: 9, h: 0.3,
+                    fontSize: 16, bold: true, color: accent, fontFace: "Calibri"
+                });
+                slide.addText(`Proteína: ${dayMeal.dinner.protein}\nCarboidrato: ${dayMeal.dinner.carb}\nVegetais: ${dayMeal.dinner.veggies}`, {
+                    x: 0.7, y: 5.1, w: 8.6, h: 0.5,
+                    fontSize: 11, color: "333333", fontFace: "Calibri"
+                });
+            });
+
+            // SLIDE 10: Lista de Compras
+            let slide10 = pres.addSlide();
+            slide10.background = { color: cream };
+            slide10.addText("🛒 Lista de Compras Semanal", {
+                x: 0.5, y: 0.3, w: 9, h: 0.5,
+                fontSize: 32, bold: true, color: primary, fontFace: "Georgia"
+            });
+
+            let listY = 1.0;
+            for (let category in shoppingList) {
+                if (shoppingList[category].length > 0) {
+                    slide10.addText(`${category}:`, {
+                        x: 0.5, y: listY, w: 4, h: 0.3,
+                        fontSize: 13, bold: true, color: accent, fontFace: "Calibri"
+                    });
+                    slide10.addText(`• ${shoppingList[category].join('\n• ')}`, {
+                        x: 0.7, y: listY + 0.35, w: 3.8, h: 0.8,
+                        fontSize: 10, color: "333333", fontFace: "Calibri"
+                    });
+                    listY += 0.7;
+                    if (listY > 4.5) {
+                        listY = 1.0;
+                        slide10 = pres.addSlide();
+                        slide10.background = { color: cream };
+                    }
+                }
+            }
+
+            // SLIDE FINAL: Dicas e Suplementação
+            let slideFinal = pres.addSlide();
+            slideFinal.background = { color: primary };
+            slideFinal.addText("💡 Dicas Importantes", {
+                x: 0.5, y: 1.0, w: 9, h: 0.6,
+                fontSize: 36, bold: true, color: white, align: "center", fontFace: "Georgia"
+            });
+
+            const tips = [
+                "✓ Hidratação: 2.5L de água por dia",
+                "✓ Durma 7-8 horas por noite",
+                "✓ Prepare refeições com antecedência",
+                "✓ Evite pular refeições",
+                "✓ Ajuste porções conforme sua fome"
+            ];
+
+            slideFinal.addText(tips.join("\n"), {
+                x: 1.5, y: 2.0, w: 7, h: 2,
+                fontSize: 16, color: cream, fontFace: "Calibri", lineSpacing: 24
+            });
+
+            if (userData.lifestyle.lowSun || userData.supplements.vitaminD) {
+                slideFinal.addText("🌞 Suplemento recomendado: Vitamina D (2.000-4.000 UI/dia)", {
+                    x: 1, y: 4.3, w: 8, h: 0.4,
+                    fontSize: 13, color: white, align: "center", fontFace: "Calibri", italic: true
+                });
+            }
+
+            slideFinal.addText("Criado com ❤️ por NutriPlan AI", {
+                x: 0.5, y: 5.0, w: 9, h: 0.3,
+                fontSize: 12, color: cream, align: "center", fontFace: "Calibri"
+            });
+
+            // Salvar
+            await pres.writeFile({ fileName: `PlanoAlimentar_${userData.name.replace(/ /g, '_')}.pptx` });
+        }
+    </script>
+</body>
+</html>
